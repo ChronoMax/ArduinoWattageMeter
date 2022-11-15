@@ -1,3 +1,5 @@
+#include <LiquidCrystal.h>
+
 // Arduino Energy Meter V2.0
 // This code is for This code is for Wemos(ESP8266) based Energy monitoring Device
 // This code is a modified version of sample code from https://github.com/pieman64/ESPecoMon
@@ -18,7 +20,10 @@ unsigned long interval = 100;
 unsigned int calibration = 100;  // V2 slider calibrates this
 unsigned int pF = 85;           // Power Factor default 95
 float bill_amount = 0;   // 30 day cost as present energy usage incl approx PF 
-unsigned int energyTariff = 8.0; // Energy cost in INR per unit (kWh)
+unsigned int energyTariff = 0.73; // Energy cost in Eur per unit (kWh)  
+
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void getACS712() {  // for AC
   Vpp = getVPP();
@@ -40,7 +45,12 @@ void getACS712() {  // for AC
   Serial.print(String(power, 3)); 
   Serial.println(" W"); 
   Serial.print("  Bill Amount: INR"); 
-  Serial.println(String(bill_amount, 2)); 
+  Serial.println(String(bill_amount, 2));
+  lcd.clear();
+  lcd.print(String(power));
+  lcd.print("W");
+  lcd.setCursor(0, 1);
+  lcd.println((String(bill_amount)));
 }
 
 float getVPP()
@@ -62,14 +72,22 @@ float getVPP()
          minValue = readValue;
      }
   } 
-   result = ((maxValue - minValue) * Vcc) / 1024.0;  
+   result = ((maxValue - minValue) * Vcc) / 1024.0;
+  // Print a message to the LCD.  
    return result;
  }
 
+ void testCommucation(){
+    Serial.println("Hello Boss");
+    delay(1500);
+ }
+
 void setup() {
- Serial.begin(9600);
+  Serial.begin(9600);
+  lcd.begin(16, 2);
 }
 
 void loop() {
   getACS712();
+  testCommucation();
 }
