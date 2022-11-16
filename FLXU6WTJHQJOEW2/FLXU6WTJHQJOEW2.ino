@@ -19,8 +19,12 @@ unsigned long current_time =0;
 unsigned long interval = 100;
 unsigned int calibration = 100;  // V2 slider calibrates this
 unsigned int pF = 85;           // Power Factor default 95
-float bill_amount = 0;   // 30 day cost as present energy usage incl approx PF 
-unsigned int energyTariff = 0.73; // Energy cost in Eur per unit (kWh)  
+float bill_amount = 0;   // 30 day cost as present energy usage incl approx PF
+float kwh = 0; 
+unsigned int energyTariff = 0.73; // Energy cost in Eur per unit (kWh)
+String sendInfoString = "";  
+int period = 2000;
+unsigned long time_now = 0;
 
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -38,14 +42,17 @@ void getACS712() {  // for AC
   current_time = millis();    
   Wh = Wh+  power *(( current_time -last_time) /3600000.0) ; // calculating energy in Watt-Hour
   bill_amount = Wh * (energyTariff/1000);
-  Serial.print("Irms:  "); 
-  Serial.print(String(Irms, 3));
-  Serial.println(" A");
-  Serial.print("Power: ");   
-  Serial.print(String(power, 3)); 
-  Serial.println(" W"); 
-  Serial.print("  Bill Amount: INR"); 
-  Serial.println(String(bill_amount, 2));
+  kwh = Wh / 1000;
+  //Serial.print("Irms:  "); 
+  //Serial.print(String(Irms, 3));
+  //Serial.println(" A");
+  //Serial.print("Power: ");   
+  //Serial.print(String(power, 3)); 
+  //Serial.println(" W"); 
+  //Serial.print("  Bill Amount: INR"); 
+  //Serial.println(String(bill_amount, 2));
+
+  //LCD
   lcd.clear();
   lcd.print(String(power));
   lcd.print("W");
@@ -77,17 +84,21 @@ float getVPP()
    return result;
  }
 
- void testCommucation(){
-    Serial.println("Hello Boss");
-    delay(1500);
- }
-
 void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);
 }
 
+void SendingData(){
+  //String that needs to be send to ESP32
+  if(millis() >= time_now + period){
+      sendInfoString = "?kwh=" + (String(kwh, 2)) + "&wattage=" + (String(power, 3));
+      Serial.println(sendInfoString);
+      time_now = millis();
+    }
+}
+
 void loop() {
   getACS712();
-  testCommucation();
+  SendingData();
 }
