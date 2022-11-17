@@ -23,7 +23,7 @@ float bill_amount = 0;   // 30 day cost as present energy usage incl approx PF
 float kwh = 0; 
 unsigned int energyTariff = 0.73; // Energy cost in Eur per unit (kWh)
 String sendInfoString = "";  
-int period = 6000;
+int period = 14000;
 unsigned long time_now = 0;
 
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
